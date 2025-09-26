@@ -1,6 +1,6 @@
 {
-    "name": "pixnet/pixframework",
-    "description": "PHP Framework developed by PIXNET",
+    "name": "chuhw/pixframework",
+    "description": "PHP Framework developed by PIXNET forked by chuhw",
     "keywords": ["pixnet", "orm", "framework"],
     "type": "library",
     "homepage": "http://framework.pixnet.net/",
