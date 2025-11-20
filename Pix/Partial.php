@@ -254,9 +254,9 @@ class Pix_Partial
             $str = Minify_HTML::minify($str, ['cssMinifier' => ['Minify_CSS', 'minify'], 'jsMinifier' => ['JSMin', 'minify']]);
         }
 
-        if (!self::$_nocache and strlen($cache_id) > 0) {
-            $cache->save($cache_key, $str);
-        }
+		if (!self::$_nocache && !empty($cache_id)) {
+			$cache->save($cache_key, $str);
+		}
 
         return $str;
     }
