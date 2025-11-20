@@ -182,31 +182,43 @@ class Pix_Partial
             $path = $file;
         }
 
-        if (!is_null($options) and is_scalar($options)) {
-            // $options 是 scalar 的話, 就是 cache id
-            $cache_id = $options;
-        } elseif (is_array($options)) {
-            // 是 array 的話, 就從 array 取出設定
-            $cache_id = $options['cache_id'];
-            $cache = $options['cache'];
-        }
+		// 先給預設值，避免未定義變數
+		$cache_id = '';
+		$cache = null;
 
-        if (!($cache instanceof Pix_Cache)) {
-            $cache = new Pix_Cache();
-        }
+		if (!is_null($options) && is_scalar($options)) {
+			// $options 是 scalar 的話，就是 cache id
+			$cache_id = (string) $options;
+		} elseif (is_array($options)) {
+			// 是 array 的話, 就從 array 取出設定
+			$cache_id = isset($options['cache_id']) ? (string) $options['cache_id'] : '';
+			if (isset($options['cache']) && $options['cache'] instanceof Pix_Cache) {
+				$cache = $options['cache'];
+			}
+		}
 
-        $cache_key = sprintf(
-            'Pix_Partial:%s:%s:%s:%s:%s:%s',
-            $this->_cache_prefix,
-            strtolower($_SERVER['HTTP_HOST']),
-            sha1(file_get_contents($path)),
-            $cache_id,
-            self::$_trim_mode ? 1 : 0,
-            self::$_minify_mode ? 1 : 0
-        );
-        if (!self::$_nocache and !self::$_write_only_mode and strlen($cache_id) > 0 and $html = $cache->load($cache_key)) {
-            return $html;
-        }
+		// 若沒有傳入 cache 或傳入的不是 Pix_Cache，就自己 new 一個
+		if (!($cache instanceof Pix_Cache)) {
+			$cache = new Pix_Cache();
+		}
+
+		$cache_key = sprintf(
+			'Pix_Partial:%s:%s:%s:%s:%s:%s',
+			$this->_cache_prefix,
+			isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : 'cli',
+			sha1(file_get_contents($path)),
+			$cache_id,
+			self::$_trim_mode ? 1 : 0,
+			self::$_minify_mode ? 1 : 0
+		);
+
+		// 這裡改成 !empty($cache_id) 比直接 strlen() 安全，也不會有未定義變數問題
+		if (!self::$_nocache
+			&& !self::$_write_only_mode
+			&& !empty($cache_id)
+			&& ($html = $cache->load($cache_key))) {
+			return $html;
+		}
 
         // TODO: 這邊要改漂亮一點的寫法
         $old_data = $this->_data;
